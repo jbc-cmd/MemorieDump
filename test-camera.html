@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camera Diagnostics</title>
+  <style>
+    body {
+      background: #0b0f19;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 { font-size: 20px; color: #00f2fe; margin-bottom: 16px; }
+    button {
+      background: #00f2fe;
+      color: #000;
+      border: none;
+      font-weight: bold;
+      font-size: 16px;
+      padding: 14px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    video {
+      width: 100%;
+      max-height: 260px;
+      background: #000;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    #log {
+      background: #151d30;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <h1>📱 Live Camera Test & Diagnostics</h1>
+  <button id="btn-start" onclick="startCamera()">🎥 Test Camera Access</button>
+  <video id="test-video" autoplay playsinline webkit-playsinline muted></video>
+  <div id="log">Waiting for you to tap "Test Camera Access"...</div>
+
+  <script>
+    const logEl = document.getElementById('log');
+    const videoEl = document.getElementById('test-video');
+
+    function log(msg) {
+      logEl.innerText += '\n' + msg;
+      console.log(msg);
+    }
+
+    async function startCamera() {
+      logEl.innerText = '[1] Starting camera test...';
+      log(`[2] Protocol: ${location.protocol}`);
+      log(`[3] Host: ${location.host}`);
+      log(`[4] UserAgent: ${navigator.userAgent}`);
+
+      if (!navigator.mediaDevices) {
+        log('❌ FATAL: navigator.mediaDevices is undefined (insecure context or unsupported browser)');
+        return;
+      }
+
+      if (!navigator.mediaDevices.getUserMedia) {
+        log('❌ FATAL: navigator.mediaDevices.getUserMedia is undefined');
+        return;
+      }
+
+      // Check available devices
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        log(`[5] Found ${videoDevices.length} video camera(s):`);
+        videoDevices.forEach((d, idx) => {
+          log(`    - Camera ${idx + 1}: ${d.label || '(unnamed)'} [id: ${d.deviceId.slice(0, 8)}...]`);
+        });
+      } catch (e) {
+        log(`[5] enumerateDevices warning: ${e.message}`);
+      }
+
+      // Test 1: Try rear environment camera
+      log('[6] Attempting getUserMedia({ video: { facingMode: "environment" } })...');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' } },
+          audio: false
+        });
+        videoEl.srcObject = stream;
+        await videoEl.play();
+        log('✅ SUCCESS: Rear Camera is working and streaming video!');
+        return;
+      } catch (err1) {
+        log(`⚠️ Test 1 failed (${err1.name}): ${err1.message}`);
+      }
+
+      // Test 2: Try standard generic camera
+      log('[7] Attempting getUserMedia({ video: true })...');
+      try {
+        const stream2 = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        videoEl.srcObject = stream2;
+        await videoEl.play();
+        log('✅ SUCCESS: Generic Camera is working and streaming video!');
+        return;
+      } catch (err2) {
+        log(`❌ Test 2 failed (${err2.name}): ${err2.message}`);
+      }
+    }
+  </script>
+</body>
+</html>

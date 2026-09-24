@@ -1,0 +1,4 @@
+# Binaries & certs
+cloudflared.exe
+*.pem
+*.log
