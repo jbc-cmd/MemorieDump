@@ -3,6 +3,8 @@
 An Augmented Reality (WebAR) mobile application that recognizes physical photo targets through your phone's camera and plays corresponding videos anchored in 3D AR space directly over the photos.
 
 ---
+just another day 
+---- 
 
 ## ✨ Features
 
