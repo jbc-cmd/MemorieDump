@@ -4,6 +4,7 @@ An Augmented Reality (WebAR) mobile application that recognizes physical photo t
 
 ---
 just another day 
+and a happy day
 ---- 
 
 ## ✨ Features
